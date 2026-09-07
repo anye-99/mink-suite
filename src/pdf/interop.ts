@@ -10,8 +10,8 @@ const PDFJS_CMAP = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/cmaps/';
 /** 导入 PDF 内置标准批注（高亮/下划线/文本笔记/矩形/圆形/墨迹）→ Mink 批注 */
 export async function importStandardAnnos(plugin: MinkSuite, file: TFile): Promise<number> {
   const { loadPdfjs } = await import('./pdfjs');
-  const lib = await loadPdfjs();
-  if (!lib) throw new Error('pdf.js 加载失败（需联网），无法导入标准批注');
+  const lib = loadPdfjs();
+  if (!lib) throw new Error('内置 pdf.js 不可用，无法导入标准批注（请先在 Obsidian 中打开该 PDF 后重试）');
   const data = await plugin.app.vault.readBinary(file);
   const doc = await lib.getDocument({
     data: new Uint8Array(data.slice(0)),

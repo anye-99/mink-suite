@@ -1,39 +1,17 @@
 /**
  * pdfjs 运行时加载器（PDF 大纲 / 文本搜索用）：
- * 1. 优先复用 Obsidian 内置查看器可能暴露的 window.pdfjsLib（私有，不保证存在）
- * 2. 回退：CDN 动态 import（esbuild 会改写静态 import()，故用 new Function 绕过）
- * 失败 → 明确报错，导航侧栏的大纲/搜索降级，不影响其他功能。
+ * 仅复用 Obsidian 内置查看器可能暴露的 window.pdfjsLib（私有，不保证存在）。
+ * 不可用时相关功能（大纲 / 全文搜索 / 标准批注导入）明确降级，不影响其他功能。
+ * 说明：不运行时加载远程代码（Obsidian 开发者政策禁止）；cMaps 仅为数据文件。
  */
-const PDFJS_VERSION = '4.8.69';
-const PDFJS_URL = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.min.mjs`;
-const PDFJS_WORKER = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.mjs`;
-const PDFJS_CMAP = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/cmaps/`;
+const PDFJS_CMAP = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/cmaps/';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PdfjsLib = any;
 
-let loading: Promise<PdfjsLib | null> | null = null;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const remoteImport = new Function('url', 'return import(url)') as (url: string) => Promise<PdfjsLib>;
-
-export function loadPdfjs(): Promise<PdfjsLib | null> {
-  if (loading) return loading;
-  loading = (async () => {
-    const w = window as unknown as { pdfjsLib?: PdfjsLib };
-    if (w.pdfjsLib) return w.pdfjsLib;
-    try {
-      const lib = await remoteImport(PDFJS_URL);
-      if (lib?.GlobalWorkerOptions) {
-        lib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
-      }
-      return lib;
-    } catch (e) {
-      console.warn('[mink-suite] pdfjs CDN load failed', e);
-      return null;
-    }
-  })();
-  return loading;
+export function loadPdfjs(): PdfjsLib | null {
+  const w = window as unknown as { pdfjsLib?: PdfjsLib };
+  return w.pdfjsLib ?? null;
 }
 
 export interface PdfOutlineItem {

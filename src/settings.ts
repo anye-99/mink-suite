@@ -150,12 +150,11 @@ export class MinkSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('OCR 引擎')
       .addDropdown(d => {
-        d.addOption('tesseract', 'Tesseract.js（本地，联网加载语言包）');
         d.addOption('ai', 'AI 视觉模型（走上方配置）');
         d.addOption('off', '关闭');
-        d.setValue(this.plugin.settings.ocrEngine);
+        d.setValue(this.plugin.settings.ocrEngine === 'ai' ? 'ai' : 'off');
         d.onChange(async v => {
-          this.plugin.settings.ocrEngine = v as 'tesseract' | 'ai' | 'off';
+          this.plugin.settings.ocrEngine = v as 'ai' | 'off';
           await this.plugin.saveSettings();
         });
       });

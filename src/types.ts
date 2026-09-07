@@ -161,7 +161,7 @@ export interface MinkSettings {
   aiVisionModel: string;
   /** CJK 字体 vault 路径（用于导出 PDF 中文文本） */
   cjkFontPath: string;
-  ocrEngine: 'tesseract' | 'ai' | 'off';
+  ocrEngine: 'ai' | 'off';
   screenshotFolder: string;
   /** 导出 PDF 时页面渲染倍率 */
   exportScale: number;
@@ -184,7 +184,7 @@ export const DEFAULT_SETTINGS: MinkSettings = {
   aiModel: '',
   aiVisionModel: '',
   cjkFontPath: '',
-  ocrEngine: 'tesseract',
+  ocrEngine: 'ai',
   screenshotFolder: '.mink-suite/assets',
   exportScale: 2,
 };

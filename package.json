@@ -1,6 +1,6 @@
 {
   "name": "mink-suite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Mink 妙笔批注套件：手写笔记(.mink)、PDF 标注/批注/遮盖/截图、便利贴、批注中心、学习卡片与 AI 问答",
   "main": "main.js",
   "type": "module",

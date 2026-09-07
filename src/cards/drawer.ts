@@ -1,7 +1,7 @@
 import { Modal, Notice, setIcon, TFile } from 'obsidian';
 import type { Card } from '../types';
 import type { MinkSuite } from '../main';
-import { ocrImage, ocrNotice } from '../ai/ocr';
+import { ocrNotice } from '../ai/ocr';
 import { AskModal } from '../ai/ask';
 import { TextResultModal } from '../core/text-result';
 import { openAnno, copyText } from '../core/link';
@@ -146,11 +146,15 @@ export class CardDrawer extends Modal {
     }
     if (c.snapshot) {
       mkOp('scan-text', 'OCR 识别截图', async () => {
+        if (!this.plugin.ai.configured()) {
+          new Notice('OCR 需要 AI 接口：请在设置 → Mink 妙笔批注套件 → AI 中配置');
+          return;
+        }
         const dataUrl = await this.snapshotToDataUrl(c.snapshot!);
         if (!dataUrl) { new Notice('找不到卡片截图'); return; }
         ocrNotice();
         try {
-          const text = await ocrImage(dataUrl);
+          const text = await this.plugin.ai.askImage('请识别并输出图片中的所有文字，保持原有换行。', [dataUrl]);
           new TextResultModal(this.plugin, text, { file: c.file ?? '', page: c.page, link: '' }).open();
         } catch (e) {
           new Notice(`OCR 失败：${(e as Error).message}`);

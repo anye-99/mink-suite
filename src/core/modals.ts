@@ -2,7 +2,7 @@ import { App, Modal, Notice, Setting } from 'obsidian';
 import type { MinkSuite } from '../main';
 import { copyImageBlob, savePngBlob, blobToDataUrl } from './snapshot';
 import { copyText } from './link';
-import { ocrImage, ocrNotice } from '../ai/ocr';
+import { ocrNotice } from '../ai/ocr';
 import { AskModal } from '../ai/ask';
 import { TextResultModal } from './text-result';
 
@@ -91,16 +91,14 @@ export class SnapshotActionsModal extends Modal {
       this.close();
     });
     mkBtn('OCR 识别', async () => {
-      const engine = this.plugin.settings.ocrEngine;
-      if (engine === 'off') { new Notice('OCR 已在设置中关闭'); return; }
+      if (this.plugin.settings.ocrEngine === 'off') { new Notice('OCR 已在设置中关闭'); return; }
+      if (!this.plugin.ai.configured()) {
+        new Notice('OCR 需要 AI 接口：请在设置 → Mink 妙笔批注套件 → AI 中配置');
+        return;
+      }
       ocrNotice();
       try {
-        let text: string;
-        if (engine === 'ai' && this.plugin.ai.configured()) {
-          text = await this.plugin.ai.askImage('请识别并输出图片中的所有文字，保持原有换行。', [this.dataUrl!]);
-        } else {
-          text = await ocrImage(this.dataUrl!);
-        }
+        const text = await this.plugin.ai.askImage('请识别并输出图片中的所有文字，保持原有换行。', [this.dataUrl!]);
         new TextResultModal(this.plugin, text, this.ctx).open();
       } catch (e) {
         new Notice(`OCR 失败：${(e as Error).message}`);
