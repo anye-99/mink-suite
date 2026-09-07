@@ -7,17 +7,20 @@ export interface InkStyle {
   opacity?: number;
   /** 荧光笔：无粗细变化、半透明 */
   highlighter?: boolean;
+  /** 流线化程度（懒笔刷强度）。越低越贴手；实时预览建议 0.32，成稿默认 0.5 */
+  streamline?: number;
 }
 
-/** perfect-freehand 生成笔迹轮廓（点为归一化坐标） */
+/** perfect-freehand 生成笔迹轮廓（点为归一化坐标，p 为真实压感 0~1） */
 export function makeStroke(points: Pt[], style: InkStyle): number[][] {
   const raw = points.map(p => [p.x, p.y, p.p ?? 0.5]);
   return getStroke(raw, {
     size: style.size,
     thinning: style.highlighter ? 0 : 0.55,
     smoothing: 0.5,
-    streamline: 0.5,
-    simulatePressure: true,
+    streamline: style.streamline ?? 0.5,
+    // 使用数控笔真实压感；mouse/touch 由 pressureOf 给固定 0.5
+    simulatePressure: false,
     last: false,
   });
 }

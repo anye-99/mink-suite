@@ -70,6 +70,8 @@ export default class MinkSuite extends Plugin {
     this.registerView(VIEW_TYPE_ANNOTATION_CENTER, leaf => new AnnotationCenterView(leaf, this));
     this.registerView(VIEW_TYPE_MD_SIDEBAR, leaf => new MdSidebarView(leaf, this));
     this.registerView(VIEW_TYPE_PDF_NAV, leaf => new PdfNavView(leaf, this));
+    // 关键：把 .mink 扩展名绑定到 MinkView，否则 Obsidian 会当未知文件交给系统「打开方式」
+    this.registerExtensions(['mink'], VIEW_TYPE_MINK);
 
     // ---------- Markdown 编辑器装饰 ----------
     this.mdAnnoExtension = buildMdAnnoExtension(this);

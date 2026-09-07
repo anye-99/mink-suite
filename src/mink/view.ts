@@ -25,13 +25,15 @@ interface PageRenderer {
   scale: number;
 }
 
+/** rect：pointerdown 时缓存的 liveCanvas 布局矩形，move 热路径避免每次强制布局 */
+interface DragBase { idx: number; rect: DOMRect }
 type DragState =
-  | { mode: 'ink'; idx: number; points: Pt[] }
-  | { mode: 'shape'; idx: number; start: Pt; cur: Pt }
-  | { mode: 'marquee'; idx: number; start: Pt; cur: Pt; el: HTMLElement }
-  | { mode: 'move'; idx: number; start: Pt; base: AnnoObject[]; ids: string[] }
-  | { mode: 'scale'; idx: number; baseBBox: Rect; startBox: Rect; base: AnnoObject[]; ids: string[] }
-  | { mode: 'screenshot'; idx: number; start: Pt; cur: Pt };
+  | (DragBase & { mode: 'ink'; points: Pt[] })
+  | (DragBase & { mode: 'shape'; start: Pt; cur: Pt })
+  | (DragBase & { mode: 'marquee'; start: Pt; cur: Pt; el: HTMLElement })
+  | (DragBase & { mode: 'move'; start: Pt; cur: Pt; base: AnnoObject[]; ids: string[] })
+  | (DragBase & { mode: 'scale'; cur: Pt; baseBBox: Rect; startBox: Rect; base: AnnoObject[]; ids: string[] })
+  | (DragBase & { mode: 'screenshot'; start: Pt; cur: Pt });
 
 /** .mink 独立手写笔记视图 */
 export class MinkView extends FileView {
@@ -49,6 +51,8 @@ export class MinkView extends FileView {
   private saveTimer: number | null = null;
   private unsubs: Array<() => void> = [];
   private flashRAF: number | null = null;
+  /** 实时预览的 rAF 合帧句柄（非空表示已有一帧排队） */
+  private liveRAF: number | null = null;
   private headerEl!: HTMLElement;
   private pagesEl!: HTMLElement;
 
@@ -106,6 +110,7 @@ export class MinkView extends FileView {
   async onUnload(): Promise<void> {
     await this.flushSave();
     if (this.flashRAF) cancelAnimationFrame(this.flashRAF);
+    if (this.liveRAF != null) cancelAnimationFrame(this.liveRAF);
     for (const u of this.unsubs) u();
     this.toolbar?.destroy();
     this.contentEl.empty();
@@ -228,7 +233,11 @@ export class MinkView extends FileView {
   // ---------- 指针交互 ----------
 
   private norm(e: PointerEvent, r: PageRenderer): Pt {
-    const rect = r.liveCanvas.getBoundingClientRect();
+    return this.normWith(r.liveCanvas.getBoundingClientRect(), e, r);
+  }
+
+  /** 用缓存 rect 换算坐标（move 热路径：避免每个事件强制读布局） */
+  private normWith(rect: DOMRect, e: PointerEvent, r: PageRenderer): Pt {
     return {
       x: ((e.clientX - rect.left) / rect.width) * r.page.width,
       y: ((e.clientY - rect.top) / rect.height) * r.page.height,
@@ -247,10 +256,11 @@ export class MinkView extends FileView {
   private onPointerDown(e: PointerEvent, r: PageRenderer): void {
     if (!this.doc) return;
     const tool = this.plugin.tools.state.tool;
-    const pt = this.norm(e, r);
+    const rect = r.liveCanvas.getBoundingClientRect();
+    const pt = this.normWith(rect, e, r);
 
     if (tool === 'select') {
-      this.startMarquee(e, r, pt);
+      this.startMarquee(e, r, pt, rect);
       return;
     }
     if (!this.plugin.inputFilter.isDrawingPointer(e)) return; // touch 滚动
@@ -259,14 +269,14 @@ export class MinkView extends FileView {
 
     switch (tool) {
       case 'pen': case 'highlighter':
-        this.drag = { mode: 'ink', idx: r.idx, points: [pt] };
+        this.drag = { mode: 'ink', idx: r.idx, rect, points: [pt] };
         break;
       case 'eraser':
-        this.drag = { mode: 'ink', idx: r.idx, points: [] };
+        this.drag = { mode: 'ink', idx: r.idx, rect, points: [] };
         this.eraseAt(r, pt);
         break;
       case 'rect': case 'ellipse': case 'line': case 'arrow': case 'arrow2':
-        this.drag = { mode: 'shape', idx: r.idx, start: pt, cur: pt };
+        this.drag = { mode: 'shape', idx: r.idx, rect, start: pt, cur: pt };
         break;
       case 'text':
         this.openTextEditor(r, pt);
@@ -278,7 +288,7 @@ export class MinkView extends FileView {
         this.addSticky(r, pt);
         break;
       case 'screenshot':
-        this.drag = { mode: 'screenshot', idx: r.idx, start: pt, cur: pt };
+        this.drag = { mode: 'screenshot', idx: r.idx, rect, start: pt, cur: pt };
         break;
       default:
         break;
@@ -287,44 +297,82 @@ export class MinkView extends FileView {
 
   private onPointerMove(e: PointerEvent, r: PageRenderer): void {
     if (!this.doc || !this.drag) return;
-    const pt = this.norm(e, r);
     const d = this.drag;
-    if (d.mode === 'ink' && d.idx === r.idx) {
-      if (d.points.length && this.plugin.tools.state.tool === 'eraser') {
-        this.eraseAt(r, pt);
-        return;
+    if (d.idx !== r.idx) return;
+    // 消费合并事件：数控笔采样率高于事件派发率，浏览器把多个采样合并进一次事件
+    const coalesced = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [];
+    const events: readonly PointerEvent[] = coalesced.length ? coalesced : [e];
+    const last = events[events.length - 1];
+
+    if (d.mode === 'ink') {
+      // pen 累积全量采样点；eraser 同样累积，帧回调里逐点擦除（避免快速划过漏擦）
+      for (const ev of events) d.points.push(this.normWith(d.rect, ev, r));
+    } else {
+      d.cur = this.normWith(d.rect, last, r);
+    }
+    this.scheduleLiveFrame();
+  }
+
+  /** 每帧最多渲染一次实时预览：一帧内多个 move 事件合并为一次绘制 */
+  private scheduleLiveFrame(): void {
+    if (this.liveRAF != null) return;
+    this.liveRAF = requestAnimationFrame(() => {
+      this.liveRAF = null;
+      this.renderLiveFrame();
+    });
+  }
+
+  private renderLiveFrame(): void {
+    const d = this.drag;
+    if (!d || !this.doc) return;
+    const r = this.renderers[d.idx];
+    if (!r) return;
+    switch (d.mode) {
+      case 'ink':
+        if (this.plugin.tools.state.tool === 'eraser') {
+          for (const p of d.points) this.eraseAt(r, p);
+          d.points = [];
+        } else {
+          this.previewInk(r, d.points);
+        }
+        break;
+      case 'shape':
+        this.previewShape(r, d.start, d.cur);
+        break;
+      case 'screenshot':
+        this.previewShape(r, d.start, d.cur, '#e8590c');
+        break;
+      case 'marquee':
+        this.updateMarquee(r, d.start, d.cur);
+        break;
+      case 'move': {
+        const dx = d.cur.x - d.start.x, dy = d.cur.y - d.start.y;
+        this.applyLivePreview(r, translateObjects(d.base, dx, dy));
+        break;
       }
-      d.points.push(pt);
-      this.previewInk(r, d.points);
-    } else if (d.mode === 'shape' && d.idx === r.idx) {
-      d.cur = pt;
-      this.previewShape(r, d.start, d.cur);
-    } else if (d.mode === 'screenshot' && d.idx === r.idx) {
-      d.cur = pt;
-      this.previewShape(r, d.start, d.cur, '#e8590c');
-    } else if (d.mode === 'marquee' && d.idx === r.idx) {
-      d.cur = pt;
-      this.updateMarquee(r, d.start, d.cur);
-    } else if (d.mode === 'move' && d.idx === r.idx) {
-      const dx = pt.x - d.start.x, dy = pt.y - d.start.y;
-      const moved = translateObjects(d.base, dx, dy);
-      this.applyLivePreview(r, moved);
-    } else if (d.mode === 'scale' && d.idx === r.idx) {
-      const box = d.startBox;
-      const boxW = Math.max(1, pt.x - box.x), boxH = Math.max(1, pt.y - box.y);
-      const scaled = scaleObjects(d.base, d.baseBBox, { x: box.x, y: box.y, w: boxW, h: boxH });
-      this.applyLivePreview(r, scaled);
+      case 'scale': {
+        const box = d.startBox;
+        const boxW = Math.max(1, d.cur.x - box.x), boxH = Math.max(1, d.cur.y - box.y);
+        this.applyLivePreview(r, scaleObjects(d.base, d.baseBBox, { x: box.x, y: box.y, w: boxW, h: boxH }));
+        break;
+      }
     }
   }
 
   private onPointerUp(e: PointerEvent, r: PageRenderer): void {
+    // 丢弃排队中的预览帧：提交数据不依赖它，避免抬笔后再画一帧过期预览
+    if (this.liveRAF != null) { cancelAnimationFrame(this.liveRAF); this.liveRAF = null; }
     if (!this.doc || !this.drag) { this.finishMarquee(r); return; }
     const d = this.drag;
     this.drag = null;
     const pt = this.norm(e, r);
 
     if (d.mode === 'ink' && d.idx === r.idx) {
-      if (d.points.length > 1 && this.plugin.tools.state.tool !== 'eraser') {
+      if (this.plugin.tools.state.tool === 'eraser') {
+        // 帧回调可能已消费部分点；剩余点在这里补擦
+        for (const p of d.points) this.eraseAt(r, p);
+        this.clearLive(r.idx);
+      } else if (d.points.length > 1) {
         this.commitInk(r, d.points);
       } else {
         this.clearLive(r.idx);
@@ -367,6 +415,8 @@ export class MinkView extends FileView {
     const isHi = st.tool === 'highlighter';
     const outline = makeStroke(points, {
       color: st.color, size: st.size * r.scale, highlighter: isHi,
+      // 预览期降低流线化：笔迹更贴笔尖；抬笔后 renderStatic 用默认 0.5 精修
+      streamline: 0.32,
     });
     ctx.globalAlpha = isHi ? 0.45 : 1;
     ctx.fillStyle = st.color;
@@ -558,7 +608,7 @@ export class MinkView extends FileView {
 
   // ---------- 选择与变换 ----------
 
-  private startMarquee(e: PointerEvent, r: PageRenderer, pt: Pt): void {
+  private startMarquee(e: PointerEvent, r: PageRenderer, pt: Pt, rect: DOMRect): void {
     // 已有选区：命中选区内 → 拖动；命中四角 → 缩放
     if (this.selected.length) {
       const box = objectsBBox(this.selected)!;
@@ -566,21 +616,21 @@ export class MinkView extends FileView {
       if (corner) {
         const baseBBox = { ...box };
         const base = this.selected.map(o => JSON.parse(JSON.stringify(o)) as AnnoObject);
-        this.drag = { mode: 'scale', idx: r.idx, baseBBox, startBox: box, base, ids: base.map(o => o.id) };
+        this.drag = { mode: 'scale', idx: r.idx, rect, cur: pt, baseBBox, startBox: box, base, ids: base.map(o => o.id) };
         e.preventDefault();
         r.liveCanvas.setPointerCapture(e.pointerId);
         return;
       }
       if (pt.x > box.x && pt.x < box.x + box.w && pt.y > box.y && pt.y < box.y + box.h) {
         const base = this.selected.map(o => JSON.parse(JSON.stringify(o)) as AnnoObject);
-        this.drag = { mode: 'move', idx: r.idx, start: pt, base, ids: base.map(o => o.id) };
+        this.drag = { mode: 'move', idx: r.idx, rect, start: pt, cur: pt, base, ids: base.map(o => o.id) };
         e.preventDefault();
         r.liveCanvas.setPointerCapture(e.pointerId);
         return;
       }
     }
     const el = r.selectLayer.createEl('div', { cls: 'mink-marquee' });
-    this.drag = { mode: 'marquee', idx: r.idx, start: pt, cur: pt, el };
+    this.drag = { mode: 'marquee', idx: r.idx, rect, start: pt, cur: pt, el };
     e.preventDefault();
     r.liveCanvas.setPointerCapture(e.pointerId);
   }
