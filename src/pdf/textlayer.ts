@@ -106,6 +106,10 @@ export function attachSelectionMenu(
     mk('回链', async () => {
       await copyText(controller.wikiLink(pageNumber), '已复制回链');
     });
+    mk('入图', async () => {
+      const { collectTextToImap } = await import('../imap/collect');
+      collectTextToImap(plugin, { text: quote, file: controller.file, page: pageNumber, quote });
+    });
   };
 
   // 选区结束（松开鼠标/抬起）后出现菜单

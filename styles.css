@@ -1129,3 +1129,223 @@
     height: 20px;
   }
 }
+
+/* ---------- .imap 批注思维导图 ---------- */
+
+.mink-imap-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+}
+
+.mink-imap-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex-wrap: wrap;
+}
+
+.mink-imap-zoom {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  min-width: 42px;
+  text-align: center;
+}
+
+.mink-imap-ops {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex-wrap: wrap;
+  background: var(--background-secondary);
+}
+
+.mink-imap-ops .mink-btn {
+  padding: 4px 8px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mink-imap-ops .mink-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mink-imap-colors {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 6px;
+}
+
+.mink-imap-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.mink-imap-color-dot:hover {
+  border-color: var(--text-normal);
+}
+
+.mink-imap-color-clear {
+  background: var(--background-modifier-border);
+}
+
+.mink-imap-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+  touch-action: none;
+}
+
+.mink-imap-viewport:active {
+  cursor: grabbing;
+}
+
+.mink-imap-world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.mink-imap-world.is-ready {
+  opacity: 1;
+}
+
+.mink-imap-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.mink-imap-edge {
+  fill: none;
+  stroke: var(--interactive-accent);
+  stroke-width: 2px;
+  opacity: 0.75;
+}
+
+.mink-imap-node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 230px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--background-primary-alt);
+  border: 2px solid var(--background-modifier-border);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.mink-imap-node:hover {
+  border-color: var(--background-modifier-border-hover);
+}
+
+.mink-imap-node.is-root {
+  font-weight: 700;
+  font-size: 1.05em;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: transparent;
+}
+
+.mink-imap-node.is-selected {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px var(--interactive-accent-hover);
+}
+
+.mink-imap-node.is-editing {
+  border-style: dashed;
+}
+
+.mink-imap-node-text {
+  word-break: break-word;
+  white-space: pre-wrap;
+  line-height: 1.35;
+}
+
+.mink-imap-node-text[contenteditable] {
+  outline: none;
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.mink-imap-node-meta {
+  display: flex;
+  gap: 5px;
+  margin-top: 3px;
+  opacity: 0.6;
+}
+
+.mink-imap-node-meta svg {
+  width: 13px;
+  height: 13px;
+}
+
+.mink-imap-thumb {
+  display: block;
+  max-width: 180px;
+  max-height: 56px;
+  border-radius: 4px;
+  margin-top: 4px;
+  pointer-events: none;
+}
+
+.mink-imap-node-fold {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--background-modifier-border);
+  color: var(--text-normal);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* 触屏：脑图节点操作按钮加大 */
+@media (hover: none) and (pointer: coarse) {
+  .mink-imap-ops .mink-btn {
+    min-height: 36px;
+    padding: 6px 10px;
+  }
+
+  .mink-imap-color-dot {
+    width: 22px;
+    height: 22px;
+  }
+}

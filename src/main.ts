@@ -12,6 +12,9 @@ import { CardStore } from './cards/model';
 import { MinkView } from './mink/view';
 import { registerMinkEmbed } from './mink/embed';
 import { defaultDoc } from './mink/file';
+import { ImapView } from './imap/view';
+import { collectTextToImap } from './imap/collect';
+import { defaultDoc as defaultImapDoc, migrateSources } from './imap/file';
 import { isPdfView, type PdfViewLike } from './pdf/private-api';
 import { PdfOverlayController } from './pdf/overlay';
 import { PdfNavView } from './pdf/nav';
@@ -26,7 +29,7 @@ import { AiHistoryModal } from './ai/history-ui';
 import { CardDrawer } from './cards/drawer';
 import { exportPdf, listMinkFiles } from './pdf/export';
 import { importStandardAnnos, exportStandardAnnos } from './pdf/interop';
-import { VIEW_TYPE_ANNOTATION_CENTER, VIEW_TYPE_MD_SIDEBAR, VIEW_TYPE_MINK, VIEW_TYPE_PDF_NAV } from './constants';
+import { VIEW_TYPE_ANNOTATION_CENTER, VIEW_TYPE_IMAP, VIEW_TYPE_MD_SIDEBAR, VIEW_TYPE_MINK, VIEW_TYPE_PDF_NAV } from './constants';
 
 export default class MinkSuite extends Plugin {
   settings!: MinkSettings;
@@ -67,11 +70,13 @@ export default class MinkSuite extends Plugin {
 
     // ---------- 视图 ----------
     this.registerView(VIEW_TYPE_MINK, leaf => new MinkView(leaf, this));
+    this.registerView(VIEW_TYPE_IMAP, leaf => new ImapView(leaf, this));
     this.registerView(VIEW_TYPE_ANNOTATION_CENTER, leaf => new AnnotationCenterView(leaf, this));
     this.registerView(VIEW_TYPE_MD_SIDEBAR, leaf => new MdSidebarView(leaf, this));
     this.registerView(VIEW_TYPE_PDF_NAV, leaf => new PdfNavView(leaf, this));
-    // 关键：把 .mink 扩展名绑定到 MinkView，否则 Obsidian 会当未知文件交给系统「打开方式」
+    // 关键：把 .mink / .imap 扩展名绑定到对应视图，否则 Obsidian 会当未知文件交给系统「打开方式」
     this.registerExtensions(['mink'], VIEW_TYPE_MINK);
+    this.registerExtensions(['imap'], VIEW_TYPE_IMAP);
 
     // ---------- Markdown 编辑器装饰 ----------
     this.mdAnnoExtension = buildMdAnnoExtension(this);
@@ -259,6 +264,24 @@ export default class MinkSuite extends Plugin {
       if (f instanceof TFile) {
         const leaf = this.app.workspace.getLeaf(true);
         await leaf.openFile(f, { active: true });
+      }
+    }).open();
+  }
+
+  private async commandNewImap(): Promise<void> {
+    new TextInputModal(this.app, '新建思维导图（名称）', `脑图 ${new Date().toLocaleDateString()}`, async name => {
+      const safe = (name || '未命名脑图').replace(/[\\/:*?"<>|]/g, '_').replace(/\.imap$/i, '');
+      const folder = this.app.workspace.getActiveFile()?.parent?.path ?? '';
+      const path = folder ? `${folder}/${safe}.imap` : `${safe}.imap`;
+      const exist = this.app.vault.getAbstractFileByPath(path);
+      if (exist instanceof TFile) {
+        await this.app.workspace.getLeaf(true).openFile(exist);
+        return;
+      }
+      await this.app.vault.create(path, JSON.stringify(defaultImapDoc(safe)));
+      const f = this.app.vault.getAbstractFileByPath(path);
+      if (f instanceof TFile) {
+        await this.app.workspace.getLeaf(true).openFile(f, { active: true });
       }
     }).open();
   }

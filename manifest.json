@@ -1,9 +1,9 @@
 {
   "id": "mink-suite",
   "name": "Mink 妙笔批注套件",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "minAppVersion": "1.8.0",
-  "description": "独立手写笔记(.mink)、PDF 标注/批注/遮盖/截图、书写便利贴、批注中心、学习卡片与 AI 问答。",
+  "description": "独立手写笔记(.mink)、PDF 标注/批注/遮盖/截图、书写便利贴、批注中心、学习卡片、批注思维导图(.imap)与 AI 问答。",
   "author": "mink-suite",
   "isDesktopOnly": false
 }

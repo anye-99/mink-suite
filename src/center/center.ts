@@ -9,6 +9,7 @@ import { NoteModal } from '../pdf/note-modal';
 import { readDoc } from '../mink/file';
 import { exportDuowei, KIND_LABELS, rowFromAnno, rowFromMd, type AnnoRow } from './duowei';
 import { inkToText } from './ink-to-text';
+import { collectRowsToImap } from '../imap/collect';
 
 /** 批注中心：按文档 / 按时间集中查看与操作全部批注 */
 export class AnnotationCenterView extends ItemView {
@@ -143,6 +144,12 @@ export class AnnotationCenterView extends ItemView {
     exportFiltered.addEventListener('click', () => {
       if (!rows.length) { new Notice('当前筛选无批注'); return; }
       void exportDuowei(this.app, rows, this.exportName('筛选'));
+    });
+    const imapSel = bar.createEl('button', { cls: 'mink-btn', text: '所选加入脑图' });
+    imapSel.addEventListener('click', () => {
+      const chosen = rows.filter(r => this.selected.has(this.rowKey(r)));
+      if (!chosen.length) { new Notice('请先勾选要加入脑图的批注'); return; }
+      collectRowsToImap(this.plugin, chosen);
     });
 
     contentEl.createEl('div', { cls: 'mink-center-count', text: `共 ${rows.length} 条批注` });

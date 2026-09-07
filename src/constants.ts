@@ -1,4 +1,5 @@
 export const VIEW_TYPE_MINK = 'mink-view';
+export const VIEW_TYPE_IMAP = 'mink-imap-view';
 export const VIEW_TYPE_ANNOTATION_CENTER = 'mink-annotation-center';
 export const VIEW_TYPE_MD_SIDEBAR = 'mink-md-sidebar';
 export const VIEW_TYPE_PDF_NAV = 'mink-pdf-nav';

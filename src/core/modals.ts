@@ -45,7 +45,7 @@ export interface SnapshotCtx {
   label?: string;
 }
 
-/** 截图操作弹窗：保存 / 复制 / 回链 / OCR / 问图 / 收藏卡片 / 加入脑图（预留） */
+/** 截图操作弹窗：保存 / 复制 / 回链 / OCR / 问图 / 收藏卡片 / 加入脑图 */
 export class SnapshotActionsModal extends Modal {
   private dataUrl: string | null = null;
 
@@ -123,8 +123,10 @@ export class SnapshotActionsModal extends Modal {
       });
       this.close();
     });
-    mkBtn('加入脑图', () => {
-      new Notice('批注思维导图（.imap）将在后续版本提供');
+    mkBtn('加入脑图', async () => {
+      const { collectSnapshotToImap } = await import('../imap/collect');
+      await collectSnapshotToImap(this.plugin, this.blob, this.ctx);
+      this.close();
     });
   }
 }

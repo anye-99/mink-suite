@@ -140,6 +140,44 @@ export interface DuoweiDoc {
   exportedFrom: string;
 }
 
+// ---------- .imap 批注思维导图 ----------
+export type IMapSourceKind = 'text' | 'anno' | 'md-anno' | 'screenshot';
+
+/** 节点采集来源（可跳回原文） */
+export interface IMapSource {
+  kind: IMapSourceKind;
+  /** 来源文件 vault 相对路径 */
+  file: string;
+  page?: number | string;
+  annoId?: string;
+  quote?: string;
+  /** 截图资源 vault 相对路径 */
+  snapshot?: string;
+}
+
+export interface IMapNode {
+  id: string;
+  /** 父节点 id；根节点为 null */
+  parentId: string | null;
+  text: string;
+  note?: string;
+  color?: string;
+  /** 相对自动布局的手动偏移（拖拽微调，子树整体跟随） */
+  dx?: number;
+  dy?: number;
+  /** 折叠子树 */
+  collapsed?: boolean;
+  source?: IMapSource;
+  created: number;
+  modified: number;
+}
+
+export interface IMapDoc {
+  version: number;
+  meta: { title?: string; created: number; modified: number };
+  nodes: IMapNode[];
+}
+
 // ---------- 设置 ----------
 export interface MinkSettings {
   dataDir: string;

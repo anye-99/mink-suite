@@ -3,3 +3,5 @@ node_modules/
 install-to-vault.ps1
 *.log
 .DS_Store
+.workbuddy/
+fns_db_inspect.py

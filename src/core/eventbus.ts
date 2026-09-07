@@ -13,6 +13,8 @@ export interface MinkEvents {
   'cards-changed': void;
   /** AI 会话历史变化 */
   'ai-history-changed': void;
+  /** .imap 思维导图文件被外部更新（采集入口写入后通知打开中的视图） */
+  'imap-changed': { file: string };
 }
 
 type Handler<K extends keyof MinkEvents> = (payload: MinkEvents[K]) => void;
