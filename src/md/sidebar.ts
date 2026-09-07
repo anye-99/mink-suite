@@ -1,8 +1,9 @@
-import { ItemView, MarkdownView, Notice, setIcon } from 'obsidian';
+import { ItemView, MarkdownView, Notice, TFile, setIcon } from 'obsidian';
 import type { MdAnnotation } from '../types';
 import type { MinkSuite } from '../main';
 import { VIEW_TYPE_MD_SIDEBAR } from '../constants';
 import { AskModal } from '../ai/ask';
+import { MdAnnoExportModal } from './export-md';
 
 /** Markdown 原文批注侧栏：查看 / 维护当前文件的原文批注 */
 export class MdSidebarView extends ItemView {
@@ -55,9 +56,19 @@ export class MdSidebarView extends ItemView {
 
     if (!this.targetFile) return;
     const annos = this.plugin.mdStore.list(this.targetFile);
-    const addBtn = contentEl.createEl('button', { cls: 'mink-btn mink-btn-primary', text: '批注选中文字' });
+    const bar = contentEl.createEl('div', { cls: 'mink-md-sidebar-actions' });
+    const addBtn = bar.createEl('button', { cls: 'mink-btn mink-btn-primary', text: '批注选中文字' });
     addBtn.addEventListener('click', () => {
       void this.plugin.annotateSelection();
+    });
+    const exportBtn = bar.createEl('button', { cls: 'mink-btn', text: '导出到文件', attr: { title: '把批注写入 Markdown 正文（引用块 / Callout / 注释）' } });
+    exportBtn.addEventListener('click', async () => {
+      const f = this.app.vault.getAbstractFileByPath(this.targetFile);
+      if (!(f instanceof TFile)) { new Notice('找不到目标文件'); return; }
+      await this.plugin.mdStore.load(this.targetFile);
+      const list = this.plugin.mdStore.list(this.targetFile);
+      if (!list.length) { new Notice('当前文件暂无批注'); return; }
+      new MdAnnoExportModal(this.plugin, f, list).open();
     });
 
     const list = contentEl.createEl('div', { cls: 'mink-center-list' });

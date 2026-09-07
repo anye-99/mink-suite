@@ -891,6 +891,29 @@
   margin-top: 6px;
 }
 
+.mink-md-sidebar-actions {
+  display: flex;
+  gap: 6px;
+  padding: 6px 0;
+  flex-wrap: wrap;
+}
+
+.mink-export-preview {
+  margin: 10px 0;
+}
+
+.mink-export-pre {
+  padding: 8px 10px;
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  font-size: var(--font-ui-smaller);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
 /* ---------- AI 问答 ---------- */
 
 .mink-ask-modal .modal-content {

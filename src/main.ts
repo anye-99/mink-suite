@@ -18,6 +18,7 @@ import { PdfNavView } from './pdf/nav';
 import { AnnotationCenterView } from './center/center';
 import { MdSidebarView } from './md/sidebar';
 import { buildMdAnnoExtension, annotateSelection, openMdSidebar } from './md/annotate';
+import { MdAnnoExportModal } from './md/export-md';
 import { MinkSettingTab } from './settings';
 import { TextInputModal } from './core/modals';
 import { AskModal } from './ai/ask';
@@ -139,6 +140,16 @@ export default class MinkSuite extends Plugin {
       id: 'open-md-sidebar',
       name: '打开原文批注侧栏',
       callback: () => void this.commandOpenMdSidebar(),
+    });
+    this.addCommand({
+      id: 'md-anno-export',
+      name: '导出批注到 Markdown 文件',
+      checkCallback: checking => {
+        const file = this.app.workspace.getActiveFile();
+        if (!file || file.extension !== 'md') return false;
+        if (!checking) void this.commandExportMdAnnos(file);
+        return true;
+      },
     });
     this.addCommand({
       id: 'ai-ask',
@@ -283,6 +294,16 @@ export default class MinkSuite extends Plugin {
     } else {
       await openMdSidebar(this, '');
     }
+  }
+
+  private async commandExportMdAnnos(file: TFile): Promise<void> {
+    await this.mdStore.load(file.path);
+    const annos = this.mdStore.list(file.path);
+    if (!annos.length) {
+      new Notice('当前文件暂无批注');
+      return;
+    }
+    new MdAnnoExportModal(this, file, annos).open();
   }
 
   // ---------- PDF 控制器管理 ----------
