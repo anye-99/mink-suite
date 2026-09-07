@@ -1,0 +1,33 @@
+{
+  "name": "mink-suite",
+  "version": "0.1.0",
+  "description": "Mink 妙笔批注套件：手写笔记(.mink)、PDF 标注/批注/遮盖/截图、便利贴、批注中心、学习卡片与 AI 问答",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "typecheck": "tsc -noEmit -skipLibCheck"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "handwriting",
+    "pdf-annotation"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.36.1",
+    "@types/node": "^22.0.0",
+    "builtin-modules": "^5.0.0",
+    "esbuild": "^0.28.2",
+    "obsidian": "^1.13.1",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@cantoo/pdf-lib": "^2.9.1",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "perfect-freehand": "^1.2.3"
+  }
+}

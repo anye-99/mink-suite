@@ -1,0 +1,1108 @@
+/* ==========================================================================
+   Mink 妙笔批注套件 styles.css
+   使用 Obsidian CSS 变量，自动适配亮/暗主题
+   ========================================================================== */
+
+/* ---------- 通用 ---------- */
+
+.mink-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--interactive-normal);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.mink-btn:hover {
+  background: var(--interactive-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+
+.mink-btn.mink-btn-primary {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.mink-btn.mink-btn-primary:hover {
+  background: var(--interactive-accent-hover);
+}
+
+.mink-op {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.mink-op:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.mink-degrade-banner {
+  margin: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-m);
+  background: var(--background-modifier-error);
+  color: var(--text-on-accent);
+  font-size: var(--font-ui-small);
+}
+
+/* ---------- 浮动工具栏（.mink / PDF 共用） ---------- */
+
+.mink-toolbar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border-radius: var(--radius-m);
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+  max-height: calc(100% - 28px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.mink-tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.mink-tool-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.mink-tool-btn.is-active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.mink-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 2px;
+  max-width: 120px;
+}
+
+.mink-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--background-modifier-border);
+}
+
+.mink-color-dot.is-active {
+  border-color: var(--text-on-accent);
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 1px;
+}
+
+.mink-size-wrap {
+  padding: 4px 2px;
+}
+
+.mink-size-input {
+  width: 100px;
+  accent-color: var(--interactive-accent);
+}
+
+.mink-sticker-picker {
+  position: absolute;
+  right: 40px;
+  top: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 6px;
+  border-radius: var(--radius-m);
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+.mink-sticker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.mink-sticker-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.mink-sticker-item.is-active {
+  background: var(--interactive-accent);
+}
+
+/* ---------- .mink 手写笔记视图 ---------- */
+
+.mink-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background: var(--background-secondary);
+}
+
+.mink-header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+.mink-header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.mink-header-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.mink-pages-wrap {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 20px;
+}
+
+.mink-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.mink-page {
+  position: relative;
+  background: var(--background-primary);
+  border-radius: 2px;
+  box-shadow: var(--shadow-s);
+  overflow: hidden;
+}
+
+.mink-page .mink-static,
+.mink-page .mink-live {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mink-page .mink-live {
+  pointer-events: none;
+}
+
+.mink-page-tools {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.mink-page:hover .mink-page-tools {
+  opacity: 1;
+}
+
+.mink-paper-select {
+  font-size: var(--font-ui-smaller);
+  padding: 2px 4px;
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+}
+
+.mink-page-del {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.mink-page-del:hover {
+  color: var(--text-error);
+  border-color: var(--text-error);
+}
+
+.mink-page .mink-sticky-layer,
+.mink-page .mink-select-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mink-marquee {
+  position: absolute;
+  border: 1.5px dashed var(--interactive-accent);
+  background: color-mix(in srgb, var(--interactive-accent) 8%, transparent);
+  pointer-events: none;
+}
+
+/* ---------- PDF 页面 overlay ---------- */
+
+.mink-pdf-overlay-root {
+  position: absolute;
+  z-index: 5;
+}
+
+.mink-pdf-anno,
+.mink-pdf-live {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mink-pdf-live {
+  pointer-events: none;
+}
+
+.mink-pdf-text-editor {
+  position: absolute;
+  min-width: 60px;
+  min-height: 28px;
+  padding: 2px 4px;
+  border: 1px dashed var(--interactive-accent);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  resize: both;
+  outline: none;
+  z-index: 8;
+}
+
+.mink-pdf-sticky-layer,
+.mink-pdf-mask-layer,
+.mink-pdf-select-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mink-pdf-mask-layer .mink-mask {
+  position: absolute;
+  background: var(--text-normal);
+  border-radius: 2px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mink-pdf-mask-layer .mink-mask.is-revealed {
+  background: color-mix(in srgb, var(--text-normal) 18%, transparent);
+}
+
+/* ---------- 书写便利贴 ---------- */
+
+.mink-sticky {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  min-height: 90px;
+  border-radius: 3px;
+  box-shadow: var(--shadow-s);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  pointer-events: auto;
+  resize: both;
+  overflow: hidden;
+}
+
+.mink-sticky-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 6px;
+  font-size: 11px;
+  opacity: 0.75;
+  cursor: move;
+  user-select: none;
+  flex: 0 0 auto;
+}
+
+.mink-sticky-del {
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.mink-sticky-del:hover {
+  color: var(--text-error);
+}
+
+.mink-sticky-text {
+  flex: 1 1 auto;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  padding: 4px 6px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- PDF 文本选择菜单 ---------- */
+
+.mink-text-menu {
+  position: absolute;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-m);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+.mink-text-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 6px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mink-text-menu-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.mink-text-menu-hi {
+  display: flex;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+/* ---------- 笔迹选择操作条 ---------- */
+
+.mink-selection {
+  position: absolute;
+  border: 1.5px dashed var(--interactive-accent);
+  pointer-events: none;
+}
+
+.mink-selection-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--interactive-accent);
+  border: 2px solid var(--background-primary);
+  border-radius: 50%;
+  pointer-events: auto;
+}
+
+.mink-selection-bar {
+  position: absolute;
+  z-index: 60;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-m);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+.mink-selection-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 8px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mink-selection-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+/* ---------- PDF 降级横幅 ---------- */
+
+.mink-pdf-toolbar .mink-tool-btn[data-tool='mask'],
+.mink-pdf-toolbar .mink-tool-btn[data-tool='screenshot'] {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 2px;
+  padding-top: 4px;
+}
+
+/* ---------- PDF 导航侧栏 ---------- */
+
+.mink-pdf-nav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mink-nav-section {
+  padding: 8px 10px 4px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex: 0 0 auto;
+}
+
+.mink-nav-input {
+  margin: 4px 10px;
+  padding: 4px 8px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+}
+
+.mink-nav-input:focus {
+  border-color: var(--interactive-accent);
+  outline: none;
+}
+
+.mink-nav-results,
+.mink-center-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 10px 12px;
+}
+
+.mink-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+}
+
+.mink-nav-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.mink-nav-item.is-active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.mink-nav-item-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mink-nav-page-no {
+  flex: 0 0 auto;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+}
+
+.mink-nav-item-del {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.mink-nav-item-del:hover {
+  color: var(--text-error);
+}
+
+.mink-nav-jump {
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+  flex: 0 0 auto;
+}
+
+.mink-nav-jump input {
+  width: 60px;
+  text-align: center;
+}
+
+.mink-nav-hit {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.mink-nav-hit-page {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+}
+
+.mink-nav-hit-snippet {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mink-nav-hit-snippet mark {
+  background: var(--text-highlight-bg);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.mink-nav-empty,
+.mink-nav-hint {
+  padding: 12px;
+  font-size: var(--font-ui-small);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.mink-nav-title {
+  font-weight: var(--font-medium);
+}
+
+.mink-nav-bl-icon {
+  color: var(--text-faint);
+  flex: 0 0 auto;
+}
+
+/* ---------- 批注中心 ---------- */
+
+.mink-center,
+.mink-annotation-center {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mink-center-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex: 0 0 auto;
+}
+
+.mink-center-bar input[type='text'] {
+  flex: 1 1 120px;
+  min-width: 100px;
+}
+
+.mink-center-select {
+  font-size: var(--font-ui-small);
+  padding: 3px 6px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.mink-center-count {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  margin-left: auto;
+}
+
+.mink-center-cb,
+.mink-center-selall {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.mink-center-file-head {
+  padding: 6px 2px;
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--background-modifier-border);
+  position: sticky;
+  top: 0;
+  background: var(--background-secondary);
+  z-index: 2;
+}
+
+.mink-center-row {
+  padding: 8px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--background-modifier-border);
+  margin-bottom: 8px;
+  background: var(--background-primary);
+}
+
+.mink-center-row.is-selected {
+  border-color: var(--interactive-accent);
+}
+
+.mink-center-row-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.mink-center-meta {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mink-center-ops {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+}
+
+.mink-kind-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: var(--font-ui-smallest);
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+  flex: 0 0 auto;
+}
+
+.mink-kind-badge.mink-kind-highlight { color: var(--color-yellow); }
+.mink-kind-badge.mink-kind-underline { color: var(--color-blue); }
+.mink-kind-badge.mink-kind-note { color: var(--color-orange); }
+.mink-kind-badge.mink-kind-ink { color: var(--color-red); }
+.mink-kind-badge.mink-kind-sticky { color: var(--color-green); }
+.mink-kind-badge.mink-kind-mask { color: var(--color-purple); }
+.mink-kind-badge.mink-kind-md { color: var(--color-cyan); }
+
+.mink-center-quote {
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  border-left: 3px solid var(--background-modifier-border);
+  padding-left: 8px;
+  margin: 4px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mink-center-note {
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+  margin: 4px 0;
+  white-space: pre-wrap;
+}
+
+.mink-center-row-body {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* ---------- 卡片收藏夹 / 抽屉 ---------- */
+
+.mink-card-drawer .modal-content {
+  width: 100%;
+}
+
+.mink-card-drawer-modal {
+  width: min(720px, 92vw);
+  height: min(640px, 84vh);
+  display: flex;
+  flex-direction: column;
+}
+
+.mink-card-drawer-modal .modal-content {
+  flex: 1 1 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mink-card-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mink-card-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--background-modifier-border);
+  margin-bottom: 8px;
+  background: var(--background-primary);
+}
+
+.mink-card-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-s);
+  flex: 0 0 auto;
+}
+
+.mink-card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mink-card-content {
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+  margin: 4px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
+.mink-card-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.mink-card-tag {
+  font-size: var(--font-ui-smallest);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+}
+
+/* ---------- Markdown 原文批注 ---------- */
+
+.mink-md-anno-line {
+  background: color-mix(in srgb, var(--color-yellow) 10%, transparent);
+}
+
+.mink-md-anno-mark {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 4px;
+  font-size: 0.8em;
+  color: var(--color-yellow);
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.mink-md-anno-mark:hover {
+  background: color-mix(in srgb, var(--color-yellow) 22%, transparent);
+  border-radius: 3px;
+}
+
+.mink-md-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mink-md-sidebar-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+.mink-md-note-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+}
+
+/* ---------- AI 问答 ---------- */
+
+.mink-ask-modal .modal-content {
+  width: 100%;
+}
+
+.mink-ask-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 4px 0 12px;
+}
+
+.mink-ask-msg {
+  max-width: 88%;
+  padding: 8px 12px;
+  border-radius: var(--radius-m);
+  font-size: var(--font-ui-small);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.mink-ask-msg.is-assistant {
+  align-self: flex-start;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.mink-ask-msg.is-user {
+  align-self: flex-end;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.mink-ask-msg.is-loading {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.mink-ask-quote {
+  margin: 4px 0 10px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--interactive-accent);
+  background: var(--background-secondary);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.mink-ask-images {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.mink-ask-images img {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.mink-ask-bar {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.mink-ask-input {
+  flex: 1 1 auto;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.mink-ask-send {
+  flex: 0 0 auto;
+}
+
+/* ---------- AI 会话历史 ---------- */
+
+.mink-ai-history .modal-content {
+  width: 100%;
+}
+
+.mink-ai-conv-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-top: 4px;
+}
+
+.mink-ai-conv-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mink-ai-conv-title {
+  flex: 1 1 auto;
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mink-ai-conv-preview {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.mink-ai-pin {
+  cursor: pointer;
+  color: var(--text-faint);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.mink-ai-pin.is-pinned {
+  color: var(--interactive-accent);
+}
+
+/* ---------- 弹窗通用 ---------- */
+
+.mink-snapshot-modal img.mink-snapshot-preview,
+.mink-snapshot-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 300px;
+  margin: 8px auto;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.mink-snapshot-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.mink-note-textarea,
+.mink-text-result {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  font-family: var(--font-text);
+  resize: vertical;
+}
+
+/* ---------- .mink 嵌入预览 ---------- */
+
+.mink-embed-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.mink-embed-wrap .mink-embed-canvas {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+  background: var(--background-primary);
+}
+
+.mink-embed-more {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+/* ---------- 触控 / 触控屏优化 ---------- */
+
+/* 触屏：增大命中区域 */
+@media (hover: none) and (pointer: coarse) {
+  .mink-tool-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .mink-header-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .mink-op,
+  .mink-selection-btn,
+  .mink-text-menu-btn {
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .mink-color-dot {
+    width: 20px;
+    height: 20px;
+  }
+}

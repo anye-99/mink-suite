@@ -1,0 +1,5 @@
+node_modules/
+.trae/
+install-to-vault.ps1
+*.log
+.DS_Store
